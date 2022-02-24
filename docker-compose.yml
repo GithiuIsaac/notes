@@ -1,0 +1,105 @@
+version: "3"
+
+networks:
+  notes:
+    external:
+      name: notes-app
+
+services: 
+   app:
+      container_name: notesapp
+      image: notesapp
+      hostname: notesapp
+      networks:
+        - notes
+      build:
+         context: .
+         dockerfile: Dockerfile
+      depends_on:
+         - postgres
+      expose:
+         - 5000
+      ports:
+         - '0.0.0.0:5000:5000'
+      environment:
+         -  DB_HOST=notesapp-db
+         -  DB_PORT=5432
+         -  DB_NAME=notes
+         -  DB_USERNAME=demo
+         -  DB_PASSWORD=secure_password
+         -  FLASK_ENV=development
+         -  FLASK_APP=.
+    
+   postgres:
+      image: postgres:latest
+      hostname: notesapp-db
+      restart: always
+      networks:
+        - notes
+      environment:
+         - POSTGRES_USER=demo
+         - POSTGRES_PASSWORD=secure_password
+         - POSTGRES_DB=notes
+      expose:
+         - 5432
+      volumes:
+         - ./postgres-data:/var/lib/postgresql/data
+         - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+  
+
+
+
+
+# version: '3.7'
+# services:
+#     postgres:
+#         image: postgres:latest
+#         restart: always
+#         environment:
+#           - POSTGRES_USER=demo
+#           - POSTGRES_PASSWORD=secure_password
+#           - POSTGRES_DB=notes
+#         ports:
+#           - '127.0.0.1:5432:5432'
+#         volumes:
+#           - ./postgres-data:/var/lib/postgresql/data
+#           - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+        
+
+
+#         version: "3"
+
+# services: 
+#    app:
+#       container_name: tlip-bridge
+#       image: iota/tlip-bridge
+#       build:
+#          context: .
+#          dockerfile: Dockerfile
+#       ports:
+#          - "4001:4001"
+#       depends_on:
+#          - db
+#       restart: on-failure
+#       network_mode: bridge
+#       links:
+#          - 'db:mysql'
+#       environment:
+#          - TZ=Africa/Nairobi
+#       volumes: 
+#          - ./tlip_docs:/documents
+
+#    db:
+#       image: mysql:5.7
+#       restart: always
+#       environment:
+#          MYSQL_DATABASE: '${MYSQL_DATABASE}'
+#          MYSQL_USER: '${MYSQL_USER}'
+#          MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+#          MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+#       ports:
+#          - '3306:3306'
+#       network_mode: bridge
+#       volumes:
+#          - ./my-db:/var/lib/mysql
